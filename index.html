@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>오늘의 반짝 운세 | 매일 아침 다정한 에너지 레터</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Pretendard & Gowun Batang Fonts -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            serif: ['"Gowun Batang"', 'serif'],
+          },
+          colors: {
+            cream: '#FDFBF7',
+            sage: {
+              50: '#F2F9F5',
+              100: '#E1F2E9',
+              200: '#C2E4D2',
+              400: '#67BC93',
+              500: '#45A87D',
+              600: '#358C66',
+              700: '#2A7052',
+            },
+            apricot: {
+              50: '#FFF7F2',
+              100: '#FFEBE0',
+              200: '#FFD3BC',
+              400: '#F79D7E',
+              500: '#F4845F',
+            },
+            skysoft: {
+              50: '#F2F8FD',
+              100: '#E0EFFB',
+              500: '#4A96D1',
+            }
+          },
+          boxShadow: {
+            'soft': '0 14px 34px -6px rgba(69, 168, 125, 0.11), 0 4px 14px -2px rgba(0, 0, 0, 0.03)',
+            'card': '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: linear-gradient(145deg, #FDFBF7 0%, #F2F9F5 48%, #FFF7F2 100%);
+      min-height: 100vh;
+    }
+    .fade-in {
+      animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    .float-emoji {
+      animation: floatSlow 3s ease-in-out infinite;
+    }
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1rem;
+    }
+  </style>
+</head>
+<body class="text-slate-700 antialiased selection:bg-sage-200 selection:text-sage-700">
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 translate-y-4">
+    <div class="bg-slate-800/95 backdrop-blur-md text-white px-5 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-2 whitespace-nowrap">
+      <span>✨</span>
+      <span id="toast-message">알림 메시지</span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="max-w-xl mx-auto px-4 py-7 sm:py-11">
+
+    <!-- ==========================================
+         VIEW 1: 첫 화면 (정보 입력 카드)
+         ========================================== -->
+    <section id="input-view" class="fade-in">
+      <!-- Header -->
+      <div class="text-center mb-7">
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/90 border border-sage-100 text-sage-700 text-xs font-bold shadow-sm mb-3">
+          <span>🍀</span>
+          <span>매일 아침, 나에게 건네는 다정한 에너지 레터</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight">
+          오늘의 반짝 운세
+        </h1>
+        <p class="text-sm text-slate-500 mt-2">
+          생년월일만 알려주시면 오늘의 기운과 행운 포인트를 쉽게 풀어드려요!
+        </p>
+      </div>
+
+      <!-- Input Form Card -->
+      <div class="bg-white/95 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-white shadow-soft relative overflow-hidden">
+        <!-- Decorative Pastels -->
+        <div class="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-sage-100/60 blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-16 -left-16 w-44 h-44 rounded-full bg-apricot-100/60 blur-2xl pointer-events-none"></div>
+
+        <form id="fortune-form" class="relative z-10 space-y-5">
+
+          <!-- 1. 이름(별명) & 성별 -->
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
+            <div class="sm:col-span-3">
+              <label for="user-name" class="block text-xs font-bold text-slate-600 mb-1.5">
+                이름 또는 별명 <span class="font-normal text-slate-400">(선택 · 화면 호칭용)</span>
+              </label>
+              <input
+                type="text"
+                id="user-name"
+                maxlength="12"
+                placeholder="예: 민지, 반짝토끼 (비워도 돼요)"
+                class="w-full px-4 py-3 text-sm bg-slate-50/80 border border-slate-200/80 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage-500/30 focus:border-sage-500 transition-all placeholder:text-slate-400"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-600 mb-1.5">성별</label>
+              <div class="grid grid-cols-2 gap-2 bg-slate-100/80 p-1 rounded-2xl border border-slate-200/50">
+                <button type="button" data-gender="female" class="gender-btn py-2.5 text-sm font-bold rounded-xl transition-all bg-white text-sage-700 shadow-sm">
+                  👩 여자
+                </button>
+                <button type="button" data-gender="male" class="gender-btn py-2.5 text-sm font-semibold rounded-xl transition-all text-slate-500 hover:text-slate-700">
+                  👦 남자
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 달력 기준 (양력 / 음력 / 음력 윤달) -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1.5">생일 달력 기준</label>
+            <div class="grid grid-cols-3 gap-2 bg-slate-100/80 p-1 rounded-2xl border border-slate-200/50">
+              <button type="button" data-cal="solar" class="cal-btn py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all bg-sage-500 text-white shadow-sm">
+                ☀️ 양력
+              </button>
+              <button type="button" data-cal="lunar" class="cal-btn py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all text-slate-500 hover:text-slate-700">
+                🌙 음력
+              </button>
+              <button type="button" data-cal="leap" class="cal-btn py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all text-slate-500 hover:text-slate-700">
+                ✨ 음력(윤달)
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. 생년월일 드롭다운 -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1.5">태어난 날 (생년월일)</label>
+            <div class="grid grid-cols-3 gap-2.5">
+              <select id="birth-year" aria-label="출생 연도" class="w-full px-3.5 py-3 text-sm font-semibold text-slate-700 bg-slate-50/80 border border-slate-200/80 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage-500/30 focus:border-sage-500 transition-all cursor-pointer">
+              </select>
+              <select id="birth-month" aria-label="출생 월" class="w-full px-3.5 py-3 text-sm font-semibold text-slate-700 bg-slate-50/80 border border-slate-200/80 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage-500/30 focus:border-sage-500 transition-all cursor-pointer">
+              </select>
+              <select id="birth-day" aria-label="출생 일" class="w-full px-3.5 py-3 text-sm font-semibold text-slate-700 bg-slate-50/80 border border-slate-200/80 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage-500/30 focus:border-sage-500 transition-all cursor-pointer">
+              </select>
+            </div>
+          </div>
+
+          <!-- 4. 태어난 시간 드롭다운 -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="birth-time" class="block text-xs font-bold text-slate-600">태어난 시간</label>
+              <span class="text-[11px] text-sage-600 font-medium">모르면 '태어난 시간 모름'을 선택하세요!</span>
+            </div>
+            <select id="birth-time" class="w-full px-4 py-3 text-sm font-semibold text-slate-700 bg-slate-50/80 border border-slate-200/80 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage-500/30 focus:border-sage-500 transition-all cursor-pointer">
+              <option value="unknown">🤷 태어난 시간 모름 (생년월일만으로 풀이)</option>
+              <option value="ja">🐭 밤 11시 30분 ~ 새벽 1시 29분 (자시)</option>
+              <option value="chuk">🐮 새벽 1시 30분 ~ 새벽 3시 29분 (축시)</option>
+              <option value="in">🐯 새벽 3시 30분 ~ 새벽 5시 29분 (인시)</option>
+              <option value="myo">🐰 아침 5시 30분 ~ 아침 7시 29분 (묘시)</option>
+              <option value="jin">🐲 아침 7시 30분 ~ 오전 9시 29분 (진시)</option>
+              <option value="sa">🐍 오전 9시 30분 ~ 오전 11시 29분 (사시)</option>
+              <option value="o">🐴 낮 11시 30분 ~ 오후 1시 29분 (오시)</option>
+              <option value="mi">🐑 오후 1시 30분 ~ 오후 3시 29분 (미시)</option>
+              <option value="sin">🐵 오후 3시 30분 ~ 오후 5시 29분 (신시)</option>
+              <option value="yu">🐔 저녁 5시 30분 ~ 저녁 7시 29분 (유시)</option>
+              <option value="sul">🐶 밤 7시 30분 ~ 밤 9시 29분 (술시)</option>
+              <option value="hae">🐷 밤 9시 30분 ~ 밤 11시 29분 (해시)</option>
+            </select>
+          </div>
+
+          <!-- 5. 내 정보 기억하기 체크박스 -->
+          <div class="pt-1 flex items-center justify-between">
+            <label class="inline-flex items-center gap-2.5 cursor-pointer select-none group">
+              <input type="checkbox" id="remember-me" checked class="w-4 h-4 rounded-md border-slate-300 text-sage-600 focus:ring-sage-500/30 cursor-pointer" />
+              <span class="text-xs sm:text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">
+                내 정보 기억하기 <span class="text-xs text-slate-400">(다음에 바로 열려요)</span>
+              </span>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-sage-500 to-sage-600 hover:from-sage-600 hover:to-sage-700 text-white font-bold text-base shadow-lg shadow-sage-500/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+            <span>오늘의 운세 확인하기 ✨</span>
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          </button>
+        </form>
+      </div>
+
+      <p class="text-center text-xs text-slate-400 mt-5">
+        같은 생년월일시라면 오늘 하루 동안 언제 다시 보아도 변함없이 일관된 운세를 보여드려요 🔒
+      </p>
+    </section>
+
+
+    <!-- ==========================================
+         VIEW 2: 결과 화면 (데일리 레터)
+         ========================================== -->
+    <section id="result-view" class="hidden space-y-5 fade-in">
+
+      <!-- Top Bar: 오늘 날짜 & 다른 사람 운세 보기 -->
+      <div class="flex items-center justify-between gap-2 bg-white/90 backdrop-blur-sm px-4 py-2.5 rounded-2xl border border-white shadow-card">
+        <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700">
+          <span class="text-base">📅</span>
+          <span id="top-today-date">2026년 11월 16일 (월)</span>
+        </div>
+
+        <button id="other-person-btn" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-sage-50 hover:bg-sage-100 text-sage-700 text-xs sm:text-sm font-bold transition-all active:scale-95">
+          <i data-lucide="users" class="w-3.5 h-3.5"></i>
+          <span>다른 사람 운세 보기</span>
+        </button>
+      </div>
+
+      <!-- User Summary Pill -->
+      <div class="bg-white/90 backdrop-blur-md rounded-3xl px-5 py-4 border border-white shadow-card flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div id="nature-emoji" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sage-100 to-apricot-100 flex items-center justify-center text-2xl shadow-inner float-emoji">
+            🌱
+          </div>
+          <div>
+            <h2 id="result-user-title" class="text-base font-extrabold text-slate-800">
+              오늘의 주인공님의 반짝 운세
+            </h2>
+            <p id="result-user-meta" class="text-xs text-slate-500 mt-0.5">
+              2000년 1월 1일 (양력) · 여자 · 시간 모름
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. 메인 요약 카드 -->
+      <div class="relative bg-white rounded-[2rem] p-6 sm:p-7 border border-white shadow-soft overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-gradient-to-br from-sage-100/70 to-amber-100/60 blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-gradient-to-tr from-rose-100/70 to-apricot-100/60 blur-2xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+          <!-- Badges Row: 기질 배지 + 에너지 날씨 배지 -->
+          <div class="flex flex-wrap items-center gap-2 mb-5">
+            <span id="nature-badge" class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-sage-50 text-sage-700 border border-sage-200/70 text-xs font-extrabold">
+              🌱 싱그러운 새싹 기질
+            </span>
+            <span id="weather-badge" class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/70 text-xs font-extrabold">
+              ☀️ 맑고 포근한 산들바람
+            </span>
+          </div>
+
+          <!-- Score & Gauge Row -->
+          <div class="flex items-center gap-4 bg-gradient-to-r from-sage-50/80 to-apricot-50/70 p-4 rounded-2xl border border-sage-100/80 mb-5">
+            <!-- Circular Progress Ring -->
+            <div class="relative w-16 h-16 shrink-0 flex items-center justify-center">
+              <svg class="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="#E2E8F0" stroke-width="6"></circle>
+                <circle id="score-ring" cx="32" cy="32" r="26" fill="none" stroke="#45A87D" stroke-width="6" stroke-linecap="round"
+                  stroke-dasharray="163.36" stroke-dashoffset="16.33" class="transition-all duration-700 ease-out"></circle>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span id="overall-score" class="text-lg font-extrabold text-slate-800 leading-none">90</span>
+                <span class="text-[10px] font-bold text-slate-400 mt-0.5">점</span>
+              </div>
+            </div>
+
+            <!-- Bar Gauge & Summary Label -->
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-extrabold text-sage-700">오늘의 종합 행운 지수</span>
+                <span id="score-grade-text" class="text-xs font-bold text-apricot-500">반짝반짝 최상급 ✨</span>
+              </div>
+              <div class="w-full h-2.5 bg-white rounded-full overflow-hidden shadow-inner">
+                <div id="score-bar" class="h-full bg-gradient-to-r from-sage-400 via-amber-400 to-rose-400 rounded-full transition-all duration-700" style="width: 90%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 오늘의 다정한 한 줄 처방 -->
+          <h3 id="overall-headline" class="font-serif text-xl sm:text-2xl font-bold text-slate-800 leading-snug mb-3">
+            "가벼운 발걸음으로 시작하면 기분 좋은 우연이 찾아오는 날이에요!"
+          </h3>
+
+          <!-- 핵심 조언 문단 -->
+          <p id="overall-desc" class="text-sm sm:text-[15px] text-slate-600 leading-relaxed mb-5">
+            타고난 나만의 부드러운 매력이 오늘의 에너지와 기분 좋게 어우러집니다. 너무 완벽하려고 애쓰기보다 호기심을 가지고 주변을 둘러보면 반가운 소식이나 작은 행운이 자연스럽게 다가올 거예요.
+          </p>
+
+          <!-- 다정한 에너지 레터 Tip -->
+          <div class="bg-apricot-50/80 rounded-2xl p-4 border border-apricot-200/50 flex items-start gap-3">
+            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-lg shadow-sm shrink-0">
+              💌
+            </div>
+            <div>
+              <span class="text-xs font-extrabold text-apricot-500 block mb-0.5">오늘의 작은 행운 미션</span>
+              <p id="overall-advice" class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
+                아침에 창문을 열어 상쾌한 공기를 마시고, 오늘 꼭 해내고 싶은 작은 목표 1가지만 가볍게 정해보세요!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 4대 세부 운세 카드 (2x2 그리드) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- 1) 학업·할 일운 -->
+        <div class="bg-white/95 rounded-3xl p-5 border border-white shadow-card hover:shadow-soft transition-all">
+          <div class="flex items-center justify-between mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-9 h-9 rounded-2xl bg-skysoft-50 flex items-center justify-center text-lg">📚</span>
+              <h4 class="font-extrabold text-slate-800 text-sm sm:text-base">학업·할 일운</h4>
+            </div>
+            <span id="work-score-badge" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-skysoft-50 text-skysoft-500">90점</span>
+          </div>
+          <p id="work-desc" class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            집중력이 쏙쏙 올라가는 날이에요! 미뤄두었던 공부나 할 일이 있다면 딱 20분만 먼저 시작해 보세요.
+          </p>
+        </div>
+
+        <!-- 2) 설렘·애정운 -->
+        <div class="bg-gradient-to-br from-white to-rose-50/50 rounded-3xl p-5 border border-rose-100/80 shadow-card hover:shadow-soft transition-all">
+          <div class="flex items-center justify-between mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-9 h-9 rounded-2xl bg-rose-50 flex items-center justify-center text-lg">💕</span>
+              <h4 class="font-extrabold text-slate-800 text-sm sm:text-base">설렘·애정운</h4>
+            </div>
+            <span id="love-score-badge" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-rose-50 text-rose-500">94점</span>
+          </div>
+          <p id="love-desc" class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            마음이 몽글몽글해지는 기분 좋은 설렘이 찾아오는 날이에요! 다정한 한마디가 거리를 한층 가깝게 만들어 줍니다.
+          </p>
+        </div>
+
+        <!-- 3) 용돈·금전운 -->
+        <div class="bg-white/95 rounded-3xl p-5 border border-white shadow-card hover:shadow-soft transition-all">
+          <div class="flex items-center justify-between mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-9 h-9 rounded-2xl bg-amber-50 flex items-center justify-center text-lg">🪙</span>
+              <h4 class="font-extrabold text-slate-800 text-sm sm:text-base">용돈·금전운</h4>
+            </div>
+            <span id="wealth-score-badge" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-600">86점</span>
+          </div>
+          <p id="wealth-desc" class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            알뜰하고 현명한 소비가 빛나는 날이에요. 충동구매만 살짝 참아내면 기분 좋은 여유가 생깁니다.
+          </p>
+        </div>
+
+        <!-- 4) 컨디션·건강운 -->
+        <div class="bg-white/95 rounded-3xl p-5 border border-white shadow-card hover:shadow-soft transition-all">
+          <div class="flex items-center justify-between mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-9 h-9 rounded-2xl bg-emerald-50 flex items-center justify-center text-lg">🍀</span>
+              <h4 class="font-extrabold text-slate-800 text-sm sm:text-base">컨디션·건강운</h4>
+            </div>
+            <span id="health-score-badge" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600">91점</span>
+          </div>
+          <p id="health-desc" class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            몸과 마음이 가볍고 상쾌한 컨디션이에요. 기지개를 쭉 펴면 오후까지 활력이 유지됩니다.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- 3. 오늘의 행운 포인트 3종 카드 -->
+      <div class="bg-white/95 rounded-3xl p-5 sm:p-6 border border-white shadow-card">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-lg">🎁</span>
+          <h4 class="font-extrabold text-slate-800 text-sm sm:text-base">오늘의 행운 포인트 3가지</h4>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- 행운의 컬러 -->
+          <div class="bg-slate-50/90 rounded-2xl p-3.5 flex items-center sm:flex-col sm:text-center justify-between sm:justify-center border border-slate-100">
+            <span class="text-xs font-semibold text-slate-400 sm:mb-1.5">행운의 컬러</span>
+            <div class="flex items-center gap-2">
+              <span id="lucky-color-dot" class="w-4 h-4 rounded-full bg-sage-500 shadow-sm border-2 border-white shrink-0"></span>
+              <span id="lucky-color-name" class="text-sm font-extrabold text-slate-700">민트 그린</span>
+            </div>
+          </div>
+
+          <!-- 행운의 아이템·간식 -->
+          <div class="bg-slate-50/90 rounded-2xl p-3.5 flex items-center sm:flex-col sm:text-center justify-between sm:justify-center border border-slate-100">
+            <span class="text-xs font-semibold text-slate-400 sm:mb-1.5">행운의 아이템·간식</span>
+            <span id="lucky-snack" class="text-sm font-extrabold text-slate-700">달콤한 제철 과일</span>
+          </div>
+
+          <!-- 행운의 시간대 -->
+          <div class="bg-slate-50/90 rounded-2xl p-3.5 flex items-center sm:flex-col sm:text-center justify-between sm:justify-center border border-slate-100">
+            <span class="text-xs font-semibold text-slate-400 sm:mb-1.5">행운의 시간대</span>
+            <span id="lucky-time" class="text-sm font-extrabold text-slate-700">오후 2시 ~ 4시</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 하단 액션 버튼 -->
+      <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+        <button id="copy-fortune-btn" class="flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-sage-500 to-sage-600 hover:from-sage-600 hover:to-sage-700 text-white text-sm font-bold shadow-md shadow-sage-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+          <span>오늘 운세 복사하기 📋</span>
+        </button>
+        <button id="go-home-btn" class="py-3.5 px-5 rounded-2xl bg-white hover:bg-slate-50 text-slate-600 border border-slate-200/80 text-sm font-bold shadow-card transition-all active:scale-[0.98] flex items-center justify-center gap-1.5">
+          <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-400"></i>
+          <span>처음으로 돌아가기</span>
+        </button>
+      </div>
+
+    </section>
+
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. 쉬운 오행·일간 기질, 에너지 날씨, 운세 문구 데이터베이스
+    // =========================================================================
+
+    const INNATE_NATURES = [
+      { emoji: '🌲', badge: '🌲 든든한 큰 나무 기질', desc: '곧고 씩씩하게 뻗어 나가는 큰 나무 같은 성실함' },
+      { emoji: '🌱', badge: '🌱 싱그러운 새싹 기질', desc: '어디서든 유연하게 피어나는 부드러운 적응력' },
+      { emoji: '☀️', badge: '☀️ 따뜻한 태양 기질', desc: '주변을 환하게 비추는 밝고 긍정적인 에너지' },
+      { emoji: '🕯️', badge: '🕯️ 반짝이는 별빛 기질', desc: '섬세하고 다정한 감성과 깊은 집중력' },
+      { emoji: '⛰️', badge: '⛰️ 단단한 바위 기질', desc: '주변에 믿음을 주는 차분하고 듬직한 힘' },
+      { emoji: '🌻', badge: '🌻 포근한 꽃밭 기질', desc: '소중한 사람들을 살뜰히 챙기는 다정다감함' },
+      { emoji: '💎', badge: '💎 단단한 원석 기질', desc: '목표를 향해 깔끔하게 나아가는 추진력' },
+      { emoji: '✨', badge: '✨ 맑은 보석 기질', desc: '센스 있고 예리한 관찰력과 감각' },
+      { emoji: '🌊', badge: '🌊 시원한 바다 기질', desc: '넓은 마음씨와 통통 튀는 창의력' },
+      { emoji: '💧', badge: '💧 맑은 시냇물 기질', desc: '상황에 맞춰 지혜롭게 흐르는 순발력' }
+    ];
+
+    const ENERGY_WEATHERS = [
+      '☀️ 맑고 포근한 아침 햇살',
+      '🌤️ 기분 좋은 산들바람',
+      '🌈 비 온 뒤 반짝이는 무지개',
+      '🍀 네잎클로버가 춤추는 들판',
+      '✨ 별빛이 쏟아지는 맑은 밤하늘',
+      '🌸 꽃잎이 살랑이는 봄날의 오후',
+      '🌊 반짝이는 윤슬이 빛나는 호수'
+    ];
+
+    const TIME_LABELS = {
+      unknown: '태어난 시간 모름',
+      ja: '밤 11:30~새벽 1:29 (자시)',
+      chuk: '새벽 1:30~3:29 (축시)',
+      in: '새벽 3:30~5:29 (인시)',
+      myo: '아침 5:30~7:29 (묘시)',
+      jin: '아침 7:30~9:29 (진시)',
+      sa: '오전 9:30~11:29 (사시)',
+      o: '낮 11:30~오후 1:29 (오시)',
+      mi: '오후 1:30~3:29 (미시)',
+      sin: '오후 3:30~5:29 (신시)',
+      yu: '저녁 5:30~7:29 (유시)',
+      sul: '밤 7:30~9:29 (술시)',
+      hae: '밤 9:30~11:29 (해시)'
+    };
+
+    const FORTUNE_POOL = {
+      headlines: [
+        "가벼운 발걸음으로 시작하면 기분 좋은 우연이 찾아오는 날이에요!",
+        "작은 친절과 웃음이 배가 되어 나에게 다시 돌아오는 하루예요.",
+        "평소 고민하던 일이 생각보다 훨씬 쉽고 깔끔하게 풀리는 날입니다.",
+        "나만의 속도로 차근차근 나아가면 멋진 칭찬과 보람이 따라와요.",
+        "새로운 아이디어가 반짝이고, 좋아하는 사람과 마음이 잘 통하는 날!",
+        "마음의 여유를 가질수록 행운이 자석처럼 가까이 다가오는 하루예요.",
+        "오늘의 작은 시도가 내일의 큰 기쁨으로 이어지는 산뜻한 날입니다.",
+        "기대하지 않았던 곳에서 반가운 소식이나 선물이 찾아올 수 있어요!"
+      ],
+      overalls: [
+        "타고난 '{natureDesc}'이 오늘의 산뜻한 에너지와 기분 좋게 어우러지는 날이에요. 억지로 앞서 나가려 애쓰지 않아도, 평소처럼 성실하고 밝게 지내면 반가운 소식이나 도움이 자연스럽게 찾아옵니다. 가벼운 마음으로 오늘 하루를 즐겨보세요.",
+        "오늘은 기운이 맑고 가볍게 흐르는 날이라 어떤 일이든 즐겁게 시작할 수 있어요. '{natureDesc}' 덕분에 주변 사람들과도 기분 좋은 시너지를 낼 수 있고, 마음속에 품었던 작은 바람이 기분 좋게 이루어질 조짐이 보입니다.",
+        "마음이 차분해지고 머리가 맑아지는 하루입니다. 내가 가진 '{natureDesc}'이 빛을 발하면서, 사소한 선택 하나도 기분 좋은 결과로 이어질 거예요. 오늘 하루 나 자신을 믿고 아낌없이 응원해 주세요.",
+        "기분 좋은 설렘이 가득한 날이에요! 평소 궁금했던 것이나 해보고 싶었던 작은 일에 가볍게 도전해 보세요. '{natureDesc}'의 장점이 잘 발휘되어 생각보다 훨씬 뿌듯하고 기분 좋은 하루를 보낼 수 있습니다."
+      ],
+      advices: [
+        "아침에 창문을 열어 상쾌한 공기를 마시고, 오늘 꼭 해내고 싶은 작은 목표 1가지만 정해보세요!",
+        "책상이나 가방 속을 3분만 깔끔하게 정돈해 보세요. 비워진 공간만큼 기분 좋은 행운이 채워집니다.",
+        "오늘 만나는 사람들에게 먼저 밝게 눈을 맞추고 인사해 보세요. 그 긍정적인 에너지가 설레는 행운을 불러옵니다.",
+        "오후에 잠깐 하늘을 올려다보며 깊게 숨을 들이마셔 보세요. 머리가 한결 맑아지고 집중력이 쑥 올라가요!",
+        "잠들기 전 오늘 고마웠던 일이나 기분 좋았던 순간 한 가지를 떠올려 보세요. 내일의 운이 더욱 단단해집니다."
+      ],
+      work: [
+        "집중력이 쏙쏙 올라가는 날이에요! 미뤄두었던 공부나 할 일이 있다면 딱 20분만 먼저 시작해 보세요. 생각보다 훨씬 술술 풀리고 뿌듯함을 느낄 수 있습니다.",
+        "아이디어가 반짝이고 이해력이 높아지는 날입니다. 헷갈리는 부분이 있다면 혼자 고민하지 말고 선생님이나 동료에게 가볍게 물어보세요. 명쾌한 해답을 얻게 됩니다.",
+        "꼼꼼함이 빛을 발하는 하루예요. 준비물이나 일정을 미리 한 번 더 체크하면 실수 없이 완벽하게 하루를 마무리하고 칭찬까지 들을 수 있어요.",
+        "우선순위를 정해 중요한 일부터 하나씩 해결해 보세요. 계획했던 일들을 깔끔하게 끝내고 나면 오후에는 한결 여유롭고 기분 좋은 자유 시간을 즐길 수 있습니다."
+      ],
+      love: [
+        "마음이 몽글몽글해지는 기분 좋은 설렘이 찾아오는 날이에요! 짝사랑하는 상대나 연인에게 솔직하고 다정한 한마디를 먼저 건네면 두 사람 사이의 거리가 한층 가까워집니다.",
+        "내 환한 미소와 자연스러운 리액션이 상대방의 마음을 기분 좋게 두드리는 날입니다. 좋아하는 사람과 우연히 눈이 마주치거나 반가운 연락을 주고받을 기회가 생길 수 있어요!",
+        "상대방의 사소한 취향이나 이야기를 잘 기억해 두었다가 가볍게 챙겨주면 큰 감동을 줄 수 있어요. 연인이라면 함께 맛있는 간식을 나누며 소소하지만 행복한 시간을 보내보세요.",
+        "감정 표현이 자연스럽고 사랑스러워지는 하루예요. 망설이던 안부 인사나 귀여운 이모티콘 하나를 톡 보내보세요. 생각지도 못한 다정한 답장이 하루를 설레게 만들어 줄 거예요."
+      ],
+      wealth: [
+        "알뜰하고 현명한 소비가 빛나는 날이에요. 충동구매만 살짝 참아낸다면 꼭 사고 싶었던 물건이나 취미를 위한 기분 좋은 여유가 생깁니다.",
+        "작은 행운이 따르는 날! 기분 좋은 할인 혜택을 발견하거나, 누군가에게 맛있는 간식이나 소소한 선물을 대접받을 수 있어요.",
+        "용돈이나 지출 계획을 가볍게 정리하기 좋은 날입니다. 불필요한 지출을 줄이고 나를 위한 건강한 먹거리나 필요한 물건에 쓰면 만족도가 아주 높아요.",
+        "흐름이 안정적이고 든든한 날이에요. 당장 큰돈을 쓰기보다 저축 목표를 세우거나 용돈 기입장을 적어보면 뿌듯한 성취감을 느낄 수 있습니다."
+      ],
+      health: [
+        "몸과 마음이 가볍고 상쾌한 컨디션이에요. 스마트폰을 보는 시간을 조금만 줄이고 기지개를 쭉 펴면 오후까지 맑고 활기찬 에너지가 유지됩니다.",
+        "물 한 잔의 힘이 큰 날이에요! 목이 마르기 전에 시원한 물이나 따뜻한 차를 자주 마시면 피로가 훨씬 덜하고 피부까지 산뜻해집니다.",
+        "가벼운 산책이나 스트레칭처럼 몸을 부드럽게 움직이는 활동이 오늘의 기운과 찰떡궁합이에요. 짧은 시간이라도 햇볕을 쬐며 걸어보세요!",
+        "충분한 휴식과 꿀잠이 보약이 되는 날입니다. 저녁에는 좋아하는 잔잔한 음악을 들으며 하루 동안 긴장했던 몸과 마음을 포근하게 풀어주세요."
+      ],
+      luckyColors: [
+        { name: '세이지 민트', hex: '#45A87D' },
+        { name: '블러쉬 핑크', hex: '#F48FB1' },
+        { name: '소프트 살구', hex: '#F49776' },
+        { name: '스카이 블루', hex: '#63B3ED' },
+        { name: '레몬 크림', hex: '#F6D365' },
+        { name: '라벤더 퍼플', hex: '#B794F4' },
+        { name: '웜 아이보리', hex: '#EAE0CE' }
+      ],
+      luckySnacks: [
+        '달콤한 제철 과일', '따뜻한 허브티 한 잔', '바삭한 버터 쿠키',
+        '상큼한 딸기·요거트 스무디', '고소한 우유·오트 라떼', '달콤한 밀크 초콜릿',
+        '톡 쏘는 레몬에이드'
+      ],
+      luckyTimes: [
+        '오전 10시 ~ 12시', '점심시간 12시 ~ 2시', '오후 2시 ~ 4시',
+        '오후 4시 ~ 6시', '저녁 7시 ~ 9시', '아침 8시 ~ 10시'
+      ]
+    };
+
+    // =========================================================================
+    // 2. 결정론적 고정 시드 (Deterministic Seed) 엔진
+    //    - 이름/별명이나 공백을 완전히 배제하고,
+    //      오직 [성별 + 달력 + 생년월일(YYYY-MM-DD) + 시간] + [오늘 날짜(YYYY-MM-DD)]만 사용
+    //    - FNV-1a 32-bit + MurmurHash3 32-bit 이중 해시로 독립 스트림 PRNG 구성
+    // =========================================================================
+
+    function fnv1aHash(str) {
+      let h = 0x811c9dc5;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+      }
+      return h >>> 0;
+    }
+
+    function murmur3Hash(str, seed = 0x9747b28c) {
+      let h = seed >>> 0;
+      for (let i = 0; i < str.length; i++) {
+        let k = str.charCodeAt(i);
+        k = Math.imul(k, 0xcc9e2d51);
+        k = (k << 15) | (k >>> 17);
+        k = Math.imul(k, 0x1b873593);
+        h ^= k;
+        h = (h << 13) | (h >>> 19);
+        h = (Math.imul(h, 5) + 0xe6546b64) >>> 0;
+      }
+      h ^= str.length;
+      h ^= h >>> 16;
+      h = Math.imul(h, 0x85ebca6b);
+      h ^= h >>> 13;
+      h = Math.imul(h, 0xc2b2ae35);
+      h ^= h >>> 16;
+      return h >>> 0;
+    }
+
+    // 0 ~ max-1 사이의 고정 정수를 반환하는 결정론적 선택 함수
+    function deterministicIndex(canonicalSeed, salt, max) {
+      const combined = `${canonicalSeed}::${salt}`;
+      const h1 = fnv1aHash(combined);
+      const h2 = murmur3Hash(combined, h1);
+      return ((h1 ^ h2) >>> 0) % max;
+    }
+
+    // min ~ max(포함) 사이의 고정 점수를 반환
+    function deterministicRange(canonicalSeed, salt, min, max) {
+      return min + deterministicIndex(canonicalSeed, salt, max - min + 1);
+    }
+
+    // 오늘 날짜 문자열 (YYYY-MM-DD) 및 한국어 요일 포맷
+    function getTodayInfo() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const daysKo = ['일', '월', '화', '수', '목', '금', '토'];
+      const dayName = daysKo[now.getDay()];
+      return {
+        iso: `${y}-${m}-${d}`,
+        display: `${y}년 ${Number(m)}월 ${Number(d)}일 (${dayName})`
+      };
+    }
+
+    // 생년월일 + 달력 기준에 따른 10가지 고정 기질 계산
+    function getInnateNature(year, month, day, calType) {
+      const targetUtc = Date.UTC(year, month - 1, day);
+      const baseUtc = Date.UTC(2000, 0, 1);
+      const diffDays = Math.round((targetUtc - baseUtc) / (1000 * 60 * 60 * 24));
+      const calOffset = calType === 'lunar' ? 3 : calType === 'leap' ? 7 : 0;
+      const idx = (((diffDays + calOffset) % 10) + 10) % 10;
+      return INNATE_NATURES[idx];
+    }
+
+    // =========================================================================
+    // 3. 앱 상태 관리 및 UI 로직
+    // =========================================================================
+    const STORAGE_KEY = 'twinkle_daily_fortune_profile_v1';
+
+    let appState = {
+      name: '',
+      gender: 'female',
+      calType: 'solar',
+      year: 2000,
+      month: 1,
+      day: 1,
+      time: 'unknown'
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = msg;
+      toast.classList.remove('opacity-0', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-4');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2600);
+    }
+
+    function populateDateSelectors() {
+      const yearSelect = document.getElementById('birth-year');
+      const monthSelect = document.getElementById('birth-month');
+
+      let yearHtml = '';
+      for (let y = 2026; y >= 1940; y--) {
+        yearHtml += `<option value="${y}">${y}년</option>`;
+      }
+      yearSelect.innerHTML = yearHtml;
+
+      let monthHtml = '';
+      for (let m = 1; m <= 12; m++) {
+        monthHtml += `<option value="${m}">${m}월</option>`;
+      }
+      monthSelect.innerHTML = monthHtml;
+
+      updateDayOptions();
+    }
+
+    function updateDayOptions() {
+      const year = Number(document.getElementById('birth-year').value) || 2000;
+      const month = Number(document.getElementById('birth-month').value) || 1;
+      const daySelect = document.getElementById('birth-day');
+      const prevDay = Number(daySelect.value) || appState.day || 1;
+
+      const maxDays = new Date(year, month, 0).getDate();
+      let dayHtml = '';
+      for (let d = 1; d <= maxDays; d++) {
+        dayHtml += `<option value="${d}">${d}일</option>`;
+      }
+      daySelect.innerHTML = dayHtml;
+      daySelect.value = Math.min(prevDay, maxDays);
+    }
+
+    function syncFormFromState() {
+      document.getElementById('user-name').value = appState.name || '';
+      document.getElementById('birth-year').value = appState.year;
+      document.getElementById('birth-month').value = appState.month;
+      updateDayOptions();
+      document.getElementById('birth-day').value = appState.day;
+      document.getElementById('birth-time').value = appState.time;
+
+      document.querySelectorAll('.gender-btn').forEach(btn => {
+        if (btn.dataset.gender === appState.gender) {
+          btn.className = 'gender-btn py-2.5 text-sm font-bold rounded-xl transition-all bg-white text-sage-700 shadow-sm';
+        } else {
+          btn.className = 'gender-btn py-2.5 text-sm font-semibold rounded-xl transition-all text-slate-500 hover:text-slate-700';
+        }
+      });
+
+      document.querySelectorAll('.cal-btn').forEach(btn => {
+        if (btn.dataset.cal === appState.calType) {
+          btn.className = 'cal-btn py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all bg-sage-500 text-white shadow-sm';
+        } else {
+          btn.className = 'cal-btn py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all text-slate-500 hover:text-slate-700';
+        }
+      });
+    }
+
+    function switchView(viewName) {
+      const inputView = document.getElementById('input-view');
+      const resultView = document.getElementById('result-view');
+
+      if (viewName === 'result') {
+        inputView.classList.add('hidden');
+        resultView.classList.remove('hidden');
+        resultView.classList.remove('fade-in');
+        void resultView.offsetWidth;
+        resultView.classList.add('fade-in');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        resultView.classList.add('hidden');
+        inputView.classList.remove('hidden');
+        inputView.classList.remove('fade-in');
+        void inputView.offsetWidth;
+        inputView.classList.add('fade-in');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // =========================================================================
+    // 4. 결과 렌더링 (100% 고정 시드 기반)
+    // =========================================================================
+    function renderFortuneResult() {
+      const today = getTodayInfo();
+      const displayName = appState.name.trim() ? appState.name.trim() : '오늘의 주인공';
+      const genderLabel = appState.gender === 'female' ? '여자' : '남자';
+      const calLabelMap = { solar: '양력', lunar: '음력', leap: '음력(윤달)' };
+      const timeLabel = TIME_LABELS[appState.time] || '태어난 시간 모름';
+
+      // 정규화된 생년월일 (YYYY-MM-DD)
+      const birthIso = `${appState.year}-${String(appState.month).padStart(2, '0')}-${String(appState.day).padStart(2, '0')}`;
+
+      // [핵심] 이름/별명을 완전히 제외한 4가지 핵심 정보 + 오늘 날짜 고정 시드
+      const canonicalSeed = `gender=${appState.gender}|cal=${appState.calType}|birth=${birthIso}|time=${appState.time}|date=${today.iso}`;
+
+      // 기질 및 오늘의 에너지 날씨
+      const nature = getInnateNature(appState.year, appState.month, appState.day, appState.calType);
+      const weather = ENERGY_WEATHERS[deterministicIndex(canonicalSeed, 'weather', ENERGY_WEATHERS.length)];
+
+      // 종합 점수 (76 ~ 99점) & 등급 문구
+      const overallScore = deterministicRange(canonicalSeed, 'overall_score', 76, 99);
+      let gradeText = '기분 좋은 순풍 🍃';
+      if (overallScore >= 93) gradeText = '반짝반짝 최상급 ✨';
+      else if (overallScore >= 85) gradeText = '상쾌하고 순조로움 ☀️';
+
+      // 문구 선택 (각 항목별 고유 salt 사용 -> 서로 간섭 없이 100% 고정)
+      const headline = FORTUNE_POOL.headlines[deterministicIndex(canonicalSeed, 'headline', FORTUNE_POOL.headlines.length)];
+      const overallTemplate = FORTUNE_POOL.overalls[deterministicIndex(canonicalSeed, 'overall_text', FORTUNE_POOL.overalls.length)];
+      const overallText = overallTemplate.replace('{natureDesc}', nature.desc);
+      const advice = FORTUNE_POOL.advices[deterministicIndex(canonicalSeed, 'advice', FORTUNE_POOL.advices.length)];
+
+      // 4대 세부 운세 점수 및 문구
+      const workScore = deterministicRange(canonicalSeed, 'work_score', 78, 99);
+      const workDesc = FORTUNE_POOL.work[deterministicIndex(canonicalSeed, 'work_desc', FORTUNE_POOL.work.length)];
+
+      const loveScore = deterministicRange(canonicalSeed, 'love_score', 78, 99);
+      const loveDesc = FORTUNE_POOL.love[deterministicIndex(canonicalSeed, 'love_desc', FORTUNE_POOL.love.length)];
+
+      const wealthScore = deterministicRange(canonicalSeed, 'wealth_score', 78, 99);
+      const wealthDesc = FORTUNE_POOL.wealth[deterministicIndex(canonicalSeed, 'wealth_desc', FORTUNE_POOL.wealth.length)];
+
+      const healthScore = deterministicRange(canonicalSeed, 'health_score', 78, 99);
+      const healthDesc = FORTUNE_POOL.health[deterministicIndex(canonicalSeed, 'health_desc', FORTUNE_POOL.health.length)];
+
+      // 행운 포인트 3종
+      const luckyColor = FORTUNE_POOL.luckyColors[deterministicIndex(canonicalSeed, 'lucky_color', FORTUNE_POOL.luckyColors.length)];
+      const luckySnack = FORTUNE_POOL.luckySnacks[deterministicIndex(canonicalSeed, 'lucky_snack', FORTUNE_POOL.luckySnacks.length)];
+      const luckyTime = FORTUNE_POOL.luckyTimes[deterministicIndex(canonicalSeed, 'lucky_time', FORTUNE_POOL.luckyTimes.length)];
+
+      // DOM 업데이트
+      document.getElementById('top-today-date').textContent = today.display;
+      document.getElementById('nature-emoji').textContent = nature.emoji;
+      document.getElementById('result-user-title').textContent = `${displayName}님의 반짝 운세`;
+      document.getElementById('result-user-meta').textContent =
+        `${appState.year}년 ${appState.month}월 ${appState.day}일 (${calLabelMap[appState.calType]}) · ${genderLabel} · ${timeLabel}`;
+
+      document.getElementById('nature-badge').textContent = nature.badge;
+      document.getElementById('weather-badge').textContent = weather;
+
+      // 원형 게이지 및 바 게이지 업데이트
+      document.getElementById('overall-score').textContent = overallScore;
+      document.getElementById('score-grade-text').textContent = gradeText;
+      document.getElementById('score-bar').style.width = `${overallScore}%`;
+      const circumference = 2 * Math.PI * 26; // 163.36
+      const offset = circumference * (1 - overallScore / 100);
+      document.getElementById('score-ring').style.strokeDashoffset = offset.toFixed(2);
+
+      document.getElementById('overall-headline').textContent = `"${headline}"`;
+      document.getElementById('overall-desc').textContent = overallText;
+      document.getElementById('overall-advice').textContent = advice;
+
+      document.getElementById('work-score-badge').textContent = `${workScore}점`;
+      document.getElementById('work-desc').textContent = workDesc;
+
+      document.getElementById('love-score-badge').textContent = `${loveScore}점`;
+      document.getElementById('love-desc').textContent = loveDesc;
+
+      document.getElementById('wealth-score-badge').textContent = `${wealthScore}점`;
+      document.getElementById('wealth-desc').textContent = wealthDesc;
+
+      document.getElementById('health-score-badge').textContent = `${healthScore}점`;
+      document.getElementById('health-desc').textContent = healthDesc;
+
+      document.getElementById('lucky-color-dot').style.backgroundColor = luckyColor.hex;
+      document.getElementById('lucky-color-name').textContent = luckyColor.name;
+      document.getElementById('lucky-snack').textContent = luckySnack;
+      document.getElementById('lucky-time').textContent = luckyTime;
+    }
+
+    // =========================================================================
+    // 5. 초기화 및 이벤트 리스너
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      populateDateSelectors();
+
+      let hasSavedProfile = false;
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          appState = {
+            ...appState,
+            ...parsed
+          };
+          hasSavedProfile = true;
+        }
+      } catch (e) {
+        console.warn('저장된 프로필 로드 실패:', e);
+      }
+
+      syncFormFromState();
+
+      if (hasSavedProfile) {
+        renderFortuneResult();
+        switchView('result');
+      } else {
+        switchView('input');
+      }
+
+      document.getElementById('birth-year').addEventListener('change', updateDayOptions);
+      document.getElementById('birth-month').addEventListener('change', updateDayOptions);
+
+      document.querySelectorAll('.gender-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          appState.gender = btn.dataset.gender;
+          syncFormFromState();
+        });
+      });
+
+      document.querySelectorAll('.cal-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          appState.calType = btn.dataset.cal;
+          syncFormFromState();
+        });
+      });
+
+      // 폼 제출 -> 결과 화면 이동
+      document.getElementById('fortune-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        appState.name = document.getElementById('user-name').value.trim();
+        appState.year = Number(document.getElementById('birth-year').value);
+        appState.month = Number(document.getElementById('birth-month').value);
+        appState.day = Number(document.getElementById('birth-day').value);
+        appState.time = document.getElementById('birth-time').value;
+
+        const rememberMe = document.getElementById('remember-me').checked;
+        try {
+          if (rememberMe) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+          } else {
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        } catch (err) {
+          console.warn('로컬 스토리지 저장 오류:', err);
+        }
+
+        renderFortuneResult();
+        switchView('result');
+      });
+
+      // 다른 사람 운세 보기 (초기화 후 입력 화면 복귀)
+      document.getElementById('other-person-btn').addEventListener('click', () => {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+        appState = {
+          name: '',
+          gender: 'female',
+          calType: 'solar',
+          year: 2000,
+          month: 1,
+          day: 1,
+          time: 'unknown'
+        };
+        document.getElementById('remember-me').checked = false;
+        syncFormFromState();
+        switchView('input');
+        showToast('새로운 사람의 생년월일시를 입력해 보세요!');
+      });
+
+      // 처음으로 돌아가기 (기존 입력값 유지한 채 입력 화면으로 복귀)
+      document.getElementById('go-home-btn').addEventListener('click', () => {
+        syncFormFromState();
+        switchView('input');
+      });
+
+      // 오늘 운세 복사하기
+      document.getElementById('copy-fortune-btn').addEventListener('click', () => {
+        const todayText = document.getElementById('top-today-date').textContent;
+        const title = document.getElementById('result-user-title').textContent;
+        const score = document.getElementById('overall-score').textContent;
+        const headline = document.getElementById('overall-headline').textContent;
+        const workScore = document.getElementById('work-score-badge').textContent;
+        const loveScore = document.getElementById('love-score-badge').textContent;
+        const wealthScore = document.getElementById('wealth-score-badge').textContent;
+        const healthScore = document.getElementById('health-score-badge').textContent;
+        const color = document.getElementById('lucky-color-name').textContent;
+        const snack = document.getElementById('lucky-snack').textContent;
+        const luckyTime = document.getElementById('lucky-time').textContent;
+
+        const copyText = [
+          `🍀 [${todayText} · ${title} (${score}점)]`,
+          `${headline}`,
+          ``,
+          `📚 학업·할 일운: ${workScore} | 💕 설렘·애정운: ${loveScore}`,
+          `🪙 용돈·금전운: ${wealthScore} | 🍀 컨디션·건강운: ${healthScore}`,
+          `🎁 행운 포인트: ${color} · ${snack} · ${luckyTime}`
+        ].join('\n');
+
+        const textArea = document.createElement('textarea');
+        textArea.value = copyText;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showToast('오늘의 반짝 운세가 클립보드에 복사되었어요! ✨');
+        } catch (err) {
+          showToast('복사에 실패했습니다.');
+        }
+        document.body.removeChild(textArea);
+      });
+    });
+  </script>
+</body>
+</html>
